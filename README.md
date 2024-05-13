@@ -21,3 +21,6 @@ Please consider upgrading to online Managed DSLS at no additional cost.
 1. Download and unzip the [latest version](https://github.com/costerwi/plugin-licenseLevel/releases/latest)
 2. Either double-click the included `install.cmd` or manually copy files into your abaqus_plugins directory
 3. Restart Abaqus CAE and you will find `License level...` in the Job module plug-ins menu
+
+## Example screenshot
+![image](https://github.com/costerwi/plugin-licenseLevel/assets/7069475/2bcdb40d-28f0-4231-ac98-4f7b6be75de6)
