@@ -11,12 +11,13 @@ import abaqusGui
 from kernelAccess import session
 import sys
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 # List of Abaqus features to report. Note: license trigram must be the first word
 features = (
-    'QPP tokens shared by Abaqus CAE and Abaqus solver\tAbaqus "Portfolio" licenses',
-    'QXT solver tokens for Abaqus, fe-safe, Tosca, Isight\tAbaqus "Extended" solver licenses',
+    'QAT solver tokens for Abaqus only\tAbaqus "Analysis" licenses',
+    'QPT tokens for either Abaqus CAE or Abaqus solver\tAbaqus "Portfolio" licenses',
+    'QXT solver tokens for Abaqus, fe-safe, Tosca, Isight\tSimulia "Extended" solver licenses',
     'SRU solver tokens for above plus CST, Simpack, PowerFLOW\tSimulia universal "SimUnit" solver licenses',
     'SUN solver credits for above plus CST, Simpack, PowerFLOW\tSimulia pre-paid consumable "SimUnit" solver licenses',
     'QAX tokens for Abaqus CAE, fe-safe GUI, Isight Gateway\tAbaqus "Extended" graphical user interface licenses',
@@ -50,12 +51,13 @@ class licenseLevelDB(AFXDataDialog):
             self.progress[trigram] = AFXProgressBar(h,
                 opts=LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT|AFXPROGRESSBAR_ITERATOR, 
                 w=200, h=22)
-            if 'QPP' == trigram:
-                h.hide()  # QPP is deprecated; hide unless it is available
+            if trigram in ('QAT', 'QPT'):
+                h.hide()  # hide deprecated tokens unless they are available on server
 
         p = FXGroupBox(self, 'Usage details', opts=FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y)
         self.text = FXText(p,
-            opts=LAYOUT_FILL_X|LAYOUT_FILL_Y|TEXT_READONLY, w=300, h=300)
+            opts=LAYOUT_FILL_X|LAYOUT_FILL_Y|TEXT_READONLY|TEXT_WORDWRAP,
+            w=300, h=300)
 
 
     def updateData(self, sender=None, sel=None, ptr=None):
@@ -82,6 +84,12 @@ class licenseLevelDB(AFXDataDialog):
             if usage:
                 details.append(trigram)
                 details.extend('\t' + line for line in usage)
+        legacy = [trigram for trigram in ('QAT', 'QPT', 'QXT') if trigram in licenseFeatures]
+        simunit = [trigram for trigram in ('SRU', 'SUN') if trigram in licenseFeatures]
+        if legacy and simunit:
+            details.append('\nNote: You have a mixture of solver license models. '
+                'Specify license_model=LEGACY to use {}, licence_model=AUTOMATIC (default) to use {}.'
+                .format(' or '.join(legacy), ' or '.join(simunit)))
         details = '\n'.join(details)
         if sys.version_info.major < 3: # Abaqus CAE < 2024
             details = details.encode('latin1', 'ignore')
