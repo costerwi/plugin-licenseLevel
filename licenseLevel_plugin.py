@@ -56,7 +56,8 @@ class licenseLevelDB(AFXDataDialog):
 
         p = FXGroupBox(self, 'Usage details', opts=FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y)
         self.text = FXText(p,
-            opts=LAYOUT_FILL_X|LAYOUT_FILL_Y|TEXT_READONLY, w=300, h=300)
+            opts=LAYOUT_FILL_X|LAYOUT_FILL_Y|TEXT_READONLY|TEXT_WORDWRAP,
+            w=300, h=300)
 
 
     def updateData(self, sender=None, sel=None, ptr=None):
@@ -83,6 +84,12 @@ class licenseLevelDB(AFXDataDialog):
             if usage:
                 details.append(trigram)
                 details.extend('\t' + line for line in usage)
+        legacy = [trigram for trigram in ('QAT', 'QPT', 'QXT') if trigram in licenseFeatures]
+        simunit = [trigram for trigram in ('SRU', 'SUN') if trigram in licenseFeatures]
+        if legacy and simunit:
+            details.append('\nNote: You have a mixture of solver license models. '
+                'Specify license_model=LEGACY to use {}, licence_model=AUTOMATIC (default) to use {}.'
+                .format(' or '.join(legacy), ' or '.join(simunit)))
         details = '\n'.join(details)
         if sys.version_info.major < 3: # Abaqus CAE < 2024
             details = details.encode('latin1', 'ignore')
