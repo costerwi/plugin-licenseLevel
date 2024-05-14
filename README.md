@@ -13,7 +13,7 @@ Other features like Catia are ignored.
 
 Beware: It can take up to a minute to collect license usage information from online servers with several unique features.
 
-Unfortunately, Flexnet data license usage data is not yet supported.
+Unfortunately, Flexnet license usage data is not yet supported.
 Please consider upgrading to online Managed DSLS at no additional cost.
 
 ## Installation instructions
