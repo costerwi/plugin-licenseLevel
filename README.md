@@ -23,4 +23,4 @@ Please consider upgrading to online Managed DSLS at no additional cost.
 3. Restart Abaqus CAE and you will find `License level...` in the Job module plug-ins menu
 
 ## Example screenshot
-![image](https://github.com/costerwi/plugin-licenseLevel/assets/7069475/2bcdb40d-28f0-4231-ac98-4f7b6be75de6)
+![image](https://github.com/costerwi/plugin-licenseLevel/assets/7069475/e24e2d28-b420-4c05-9127-ece2a919e668)
