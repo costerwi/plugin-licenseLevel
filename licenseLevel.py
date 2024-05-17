@@ -27,6 +27,8 @@ def dslsstat():
         stdout_data, stderr_data = proc.communicate()
 
     summary = {'error': stderr_data.decode()}
+    if proc.returncode:
+        summary['error'] += stdout_data.decode()
     beyondHeader = False
     feature = None
     for line in stdout_data.decode().split('\n'):
@@ -54,6 +56,8 @@ def dslsstat():
 def printSummary():
     "Print license status to stdout"
     summary = dslsstat()
+    if 'error' in summary:
+        print(summary['error'])
     for trigram in report:
         feature = summary.get(trigram)
         if feature is None:
