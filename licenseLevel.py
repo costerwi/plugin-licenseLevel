@@ -62,7 +62,7 @@ def printSummary():
         feature = summary.get(trigram)
         if feature is None:
             continue
-        print(trigram, feature['inuse'], 'in use of', feature['number'])
+        print(trigram, feature['number'] - feature['inuse'], 'available of', feature['number'])
         for line in feature.get('usage', []):
             print('\t' + line)
 
