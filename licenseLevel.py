@@ -18,7 +18,7 @@ def dslsstat():
     import subprocess
     from subprocess import Popen, PIPE
     import sys
-    cmd = ['abaqus', 'licensing', 'dslsstat', '-usage']
+    cmd = 'abaqus licensing dslsstat -usage'
     proc = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
     if sys.version_info.major >= 3:
         stdout_data, stderr_data = proc.communicate(timeout=60)
@@ -27,6 +27,8 @@ def dslsstat():
         stdout_data, stderr_data = proc.communicate()
 
     summary = {'error': stderr_data.decode()}
+    if proc.returncode:
+        summary['error'] += stdout_data.decode()
     beyondHeader = False
     feature = None
     for line in stdout_data.decode().split('\n'):
@@ -54,11 +56,13 @@ def dslsstat():
 def printSummary():
     "Print license status to stdout"
     summary = dslsstat()
+    if 'error' in summary:
+        print(summary['error'])
     for trigram in report:
         feature = summary.get(trigram)
         if feature is None:
             continue
-        print(trigram, feature['inuse'], 'in use of', feature['number'])
+        print(trigram, feature['number'] - feature['inuse'], 'available of', feature['number'])
         for line in feature.get('usage', []):
             print('\t' + line)
 
