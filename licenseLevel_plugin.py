@@ -11,7 +11,7 @@ import abaqusGui
 from kernelAccess import session
 import sys
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 # List of Abaqus features to report. Note: license trigram must be the first word
 features = (
@@ -73,14 +73,14 @@ class licenseLevelDB(AFXDataDialog):
             progress = self.progress.get(trigram)
             progress.setTotal(0) # default to 0
             progress.setProgress(0)
-            data = licenseFeatures.get(trigram)
-            if data is None:
+            featureData = licenseFeatures.get(trigram)
+            if featureData is None:
                 continue
             progress.getOwner().show() # make sure it's visible
-            total = data.get('number', 0)
+            total = featureData.get('number', 0)
             progress.setTotal(total)
-            progress.setProgress(total - data.get('inuse', 0))
-            usage = data.get('usage')
+            progress.setProgress(total - featureData.get('inuse', 0))
+            usage = featureData.get('usage')
             if usage:
                 details.append(trigram)
                 details.extend('\t' + line for line in usage)

@@ -2,15 +2,15 @@
 """Collect and print current Abaqus license usage information
 
 Usage:
-    abaqus python licenseLevel.py
+
+    abaqus python licenseLevel.py [--all] [trigram...]
 
 Carl Osterwisch, May 2024
+https://github.com/costerwi/plugin-licenseLevel
 """
 
 from __future__ import print_function
-
-# Customize following line for the trigrams desired in report
-report = ('QAX', 'QXT', 'SRU', 'SUN')
+import sys
 
 def dslsstat():
     "Collect current license usage data using dslsstat"
@@ -53,18 +53,32 @@ def dslsstat():
             usage.append(re.sub('\(.+, ', '', line.strip()))
     return summary
 
-def printSummary():
+def printSummary(trigrams=[]):
     "Print license status to stdout"
-    summary = dslsstat()
-    if 'error' in summary:
-        print(summary['error'])
-    for trigram in report:
-        feature = summary.get(trigram)
-        if feature is None:
+    licenseFeatures = dslsstat()
+    error = licenseFeatures.get('error')
+    if error:
+        print(error)
+    if not trigrams:
+        # use default Abaqus list
+        trigrams = 'QAT', 'QPT', 'QXT', 'SRU', 'SUN', 'QAX'
+    elif '--all' in trigrams:
+        # report all available features
+        trigrams = sorted(licenseFeatures.keys())
+    for trigram in trigrams:
+        featureData = licenseFeatures.get(trigram.upper())
+        if featureData is None:
             continue
-        print(trigram, feature['number'] - feature['inuse'], 'available of', feature['number'])
-        for line in feature.get('usage', []):
+        print(trigram,
+            featureData['number'] - featureData['inuse'],
+            'available of',
+            featureData['number'],
+            featureData['model'].lower() + 's')
+        for line in featureData.get('usage', []):
             print('\t' + line)
 
 if __name__ == '__main__':
-    printSummary()
+    if '--help' in sys.argv:
+        sys.exit(__doc__)
+    # use trigrams specified on command line, if any
+    printSummary(sys.argv[1:])
