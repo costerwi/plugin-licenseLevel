@@ -62,7 +62,7 @@ def dslsstat():
     stderr = stderr_data.decode()
     if proc.returncode:
         stderr += stdout_data.decode()
-    return summary(StringIO(stdout_data.decode()), StringIO(stderr))
+    return summarize(StringIO(stdout_data.decode()), StringIO(stderr))
 
 
 def summarize(stdout, stderr=None):
