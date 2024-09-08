@@ -9,7 +9,8 @@ Carl Osterwisch, May 2024
 https://github.com/costerwi/plugin-licenseLevel
 """
 
-from __future__ import print_function
+from __future__ import print_function, with_statement
+from io import StringIO
 import re
 import sys
 
@@ -58,13 +59,20 @@ def dslsstat():
     else:
         # timeout unsupported in Abaqus < 2024
         stdout_data, stderr_data = proc.communicate()
-
-    summary = {'error': stderr_data.decode()}
+    stderr = stderr_data.decode()
     if proc.returncode:
-        summary['error'] += stdout_data.decode()
+        stderr += stdout_data.decode()
+    return summary(StringIO(stdout_data.decode()), StringIO(stderr))
+
+
+def summarize(stdout, stderr=None):
+    "Parse streams of dslsstat data and return summary dict"
+    summary = {}
+    if stderr:
+        summary['error'] = '\n'.join(stderr.readlines())
     beyondHeader = False
     feature = None
-    for line in stdout_data.decode().split('\n'):
+    for line in stdout:
         if not beyondHeader:
             if line.startswith('Licenses:'):
                 beyondHeader = True
@@ -97,9 +105,14 @@ def dslsstat():
         data['usage'] = [str(usageLine) for order, usageLine in sorted(usage.values())]
     return summary
 
+
 def printSummary(trigrams=[]):
     "Print license status to stdout"
-    licenseFeatures = dslsstat()
+    if sys.stdin.isatty():
+        licenseFeatures = dslsstat()
+    else:
+        # read from pipe
+        licenseFeatures = summarize(sys.stdin)
     error = licenseFeatures.get('error')
     if error:
         print(error)
