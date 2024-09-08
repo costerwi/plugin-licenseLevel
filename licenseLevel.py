@@ -11,15 +11,20 @@ https://github.com/costerwi/plugin-licenseLevel
 
 from __future__ import print_function, with_statement
 from io import StringIO
+import itertools
 import re
 import sys
 
-class UsageLine:
+class UsageLine(object):
     "Convenience class for working with license usage strings"
+
+    sequence_iter = itertools.count() # running total of class instances
 
     def __init__(self, line):
         self.line = str(line).strip()
+        self.sequence = next(self.sequence_iter) # used to preserve order
 
+    @property
     def jobId(self):
         "Extract unique job Id from raw usage line"
         m = re.search('\(.+\)', self.line)
@@ -27,20 +32,21 @@ class UsageLine:
             return m.group(0)
         return ''
 
-    def getLicenses(self):
+    @property
+    def licenses(self):
         "Return int number of licenses"
         m = re.search('(\d+) licenses', self.line)
         if m:
             return int(m.group(1))
         return 0
 
-    def setLicenses(self, n):
+    @licenses.setter
+    def licenses(self, n):
         "Set number of licenses"
         self.line = re.sub('\d+ license', '{} license'.format(n), self.line)
 
-    def addLicenses(self, other):
-        "Add licenses from another UsageLine"
-        self.setLicenses(self.getLicenses() + other.getLicenses())
+    def __lt__(self, other):
+        return self.sequence < other.sequence
 
     def __str__(self):
         "Return abreviated string with jobId removed"
@@ -90,19 +96,20 @@ def summarize(stdout, stderr=None):
             feature.update(row)
         elif feature and 'using' in line:
             # collect detailed usage data from lines following feature
-            usage = feature.setdefault('usage', {})
+            usage = feature.setdefault('usage', {}) # jobId: UsageLine
             usageLine = UsageLine(line)
-            jobId = usageLine.jobId()
-            if jobId in usage:
-                usage[jobId][1].addLicenses(usageLine)
+            previousUsage = usage.get(usageLine.jobId)
+            if previousUsage is None:
+                usage[usageLine.jobId] = usageLine
             else:
-                usage[jobId] = (len(usage), usageLine)
+                # Accumulate license usage for the same jobId
+                previousUsage.licenses += usageLine.licenses
     for trigram, data in summary.items():
         # Convert usage dict to ordered list of strings
         if not 'usage' in data:
             continue
         usage = data.get('usage')
-        data['usage'] = [str(usageLine) for order, usageLine in sorted(usage.values())]
+        data['usage'] = [str(usageLine) for usageLine in sorted(usage.values())]
     return summary
 
 
