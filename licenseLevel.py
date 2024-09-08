@@ -9,12 +9,52 @@ Carl Osterwisch, May 2024
 https://github.com/costerwi/plugin-licenseLevel
 """
 
-from __future__ import print_function
+from __future__ import print_function, with_statement
+from io import StringIO
+import itertools
+import re
 import sys
+
+class UsageLine(object):
+    "Convenience class for working with license usage strings"
+
+    sequence_iter = itertools.count() # running total of class instances
+
+    def __init__(self, line):
+        self.line = str(line).strip()
+        self.sequence = next(self.sequence_iter) # used to preserve order
+
+    @property
+    def jobId(self):
+        "Extract unique job Id from raw usage line"
+        m = re.search('\(.+\)', self.line)
+        if m:
+            return m.group(0)
+        return ''
+
+    @property
+    def licenses(self):
+        "Return int number of licenses"
+        m = re.search('(\d+) licenses', self.line)
+        if m:
+            return int(m.group(1))
+        return 0
+
+    @licenses.setter
+    def licenses(self, n):
+        "Set number of licenses"
+        self.line = re.sub('\d+ license', '{} license'.format(n), self.line)
+
+    def __lt__(self, other):
+        return self.sequence < other.sequence
+
+    def __str__(self):
+        "Return abreviated string with jobId removed"
+        return re.sub('\(.+, ', '', self.line)
+
 
 def dslsstat():
     "Collect current license usage data using dslsstat"
-    import re
     import subprocess
     from subprocess import Popen, PIPE
     import sys
@@ -25,13 +65,20 @@ def dslsstat():
     else:
         # timeout unsupported in Abaqus < 2024
         stdout_data, stderr_data = proc.communicate()
-
-    summary = {'error': stderr_data.decode()}
+    stderr = stderr_data.decode()
     if proc.returncode:
-        summary['error'] += stdout_data.decode()
+        stderr += stdout_data.decode()
+    return summarize(StringIO(stdout_data.decode()), StringIO(stderr))
+
+
+def summarize(stdout, stderr=None):
+    "Parse streams of dslsstat data and return summary dict"
+    summary = {}
+    if stderr:
+        summary['error'] = '\n'.join(stderr.readlines())
     beyondHeader = False
     feature = None
-    for line in stdout_data.decode().split('\n'):
+    for line in stdout:
         if not beyondHeader:
             if line.startswith('Licenses:'):
                 beyondHeader = True
@@ -49,13 +96,30 @@ def dslsstat():
             feature.update(row)
         elif feature and 'using' in line:
             # collect detailed usage data from lines following feature
-            usage = feature.setdefault('usage', [])
-            usage.append(re.sub('\(.+, ', '', line.strip()))
+            usage = feature.setdefault('usage', {}) # jobId: UsageLine
+            usageLine = UsageLine(line)
+            previousUsage = usage.get(usageLine.jobId)
+            if previousUsage is None:
+                usage[usageLine.jobId] = usageLine
+            else:
+                # Accumulate license usage for the same jobId
+                previousUsage.licenses += usageLine.licenses
+    for trigram, data in summary.items():
+        # Convert usage dict to ordered list of strings
+        if not 'usage' in data:
+            continue
+        usage = data.get('usage')
+        data['usage'] = [str(usageLine) for usageLine in sorted(usage.values())]
     return summary
+
 
 def printSummary(trigrams=[]):
     "Print license status to stdout"
-    licenseFeatures = dslsstat()
+    if sys.stdin.isatty():
+        licenseFeatures = dslsstat()
+    else:
+        # read from pipe
+        licenseFeatures = summarize(sys.stdin)
     error = licenseFeatures.get('error')
     if error:
         print(error)
