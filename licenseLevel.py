@@ -27,7 +27,7 @@ class UsageLine(object):
     @property
     def jobId(self):
         "Extract unique job Id from raw usage line"
-        m = re.search('\(.+\)', self.line)
+        m = re.match('.+ using', self.line)
         if m:
             return m.group(0)
         return ''
