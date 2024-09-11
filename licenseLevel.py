@@ -12,8 +12,11 @@ https://github.com/costerwi/plugin-licenseLevel
 from __future__ import print_function, with_statement
 from io import StringIO
 import itertools
+import os
 import re
 import sys
+
+DEBUG = os.environ.get('DEBUG')
 
 class UsageLine(object):
     "Convenience class for working with license usage strings"
@@ -69,6 +72,10 @@ def dslsstat():
         # timeout unsupported in Abaqus < 2024
         stdout_data, stderr_data = proc.communicate()
     stderr = stderr_data.decode()
+    if DEBUG:
+        print('dslsstat error code:', proc.returncode)
+        print(' stderr:', stderr)
+        print(' stdout:', stdout_data.decode())
     if proc.returncode:
         stderr += stdout_data.decode()
     return summarize(StringIO(stdout_data.decode()), StringIO(stderr))
@@ -100,6 +107,7 @@ def summarize(stdout, stderr=None):
         elif feature and 'using' in line:
             # collect detailed usage data from lines following feature
             usage = feature.setdefault('usage', {}) # jobId: UsageLine
+            if DEBUG: print(feature['feature'], line.strip())
             usageLine = UsageLine(line)
             previousUsage = usage.get(usageLine.jobId)
             if previousUsage is None:
