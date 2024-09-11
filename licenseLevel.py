@@ -58,8 +58,11 @@ def dslsstat():
     import subprocess
     from subprocess import Popen, PIPE
     import sys
-    cmd = 'abaqus licensing dslsstat -usage'
-    proc = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = ['abaqus', 'licensing', 'dslsstat', '-usage']
+    if sys.platform == 'win32':
+        cmd[0] += '.bat' # Windows batch file
+    cmd[0] = os.environ.get('ABAQUS_CMD', cmd[0]) # use env variable if available
+    proc = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE)
     if sys.version_info.major >= 3:
         stdout_data, stderr_data = proc.communicate(timeout=60)
     else:
