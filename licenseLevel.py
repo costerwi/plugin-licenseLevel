@@ -30,7 +30,7 @@ class UsageLine(object):
     @property
     def jobId(self):
         "Extract unique job Id from raw usage line"
-        m = re.match('.+ using', self.line)
+        m = re.match('.+:\d+', self.line)
         if m:
             return m.group(0)
         return ''
@@ -109,7 +109,7 @@ def summarize(stdout, stderr=None):
             row['number'] = int(row['number']) + feature.get('number', 0) # cumulative
             row['inuse'] = int(row['inuse']) + feature.get('inuse', 0) # cumulative
             feature.update(row)
-        elif feature and 'using' in line:
+        elif feature and 'granted' in line:
             # collect detailed usage data from lines following feature
             usage = feature.setdefault('usage', {}) # jobId: UsageLine
             if DEBUG: print(feature['feature'], line.strip())
