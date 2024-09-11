@@ -125,7 +125,7 @@ def printSummary(trigrams=[]):
         print(error)
     if not trigrams:
         # use default Abaqus list
-        trigrams = 'QAT', 'QPT', 'QXT', 'SRU', 'SUN', 'QAX'
+        trigrams = 'QAT', 'QPT', 'QXT', 'SRU', 'SUN', 'QAX', 'QSI', 'QPA'
     elif '--all' in trigrams:
         # report all available features
         trigrams = sorted(licenseFeatures.keys())

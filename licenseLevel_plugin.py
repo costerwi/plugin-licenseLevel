@@ -21,6 +21,8 @@ features = (
     'SRU solver tokens for above plus CST, Simpack, PowerFLOW\tSimulia universal "SimUnit" solver licenses',
     'SUN solver credits for above plus CST, Simpack, PowerFLOW\tSimulia pre-paid consumable "SimUnit" solver licenses',
     'QAX tokens for Abaqus CAE, fe-safe GUI, Isight Gateway\tAbaqus "Extended" graphical user interface licenses',
+    'QSI tokens for Abaqus CAE Solidworks Associative Interface',
+    'QPA tokens for Abaqus CAE Creo Associative Interface',
 )
 
 ###########################################################################
@@ -51,8 +53,8 @@ class licenseLevelDB(AFXDataDialog):
             self.progress[trigram] = AFXProgressBar(h,
                 opts=LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT|AFXPROGRESSBAR_ITERATOR, 
                 w=200, h=22)
-            if trigram in ('QAT', 'QPT'):
-                h.hide()  # hide deprecated tokens unless they are available on server
+            if trigram in ('QAT', 'QPT', 'QSI', 'QPA'):
+                h.hide()  # hide tokens unless they are available on server
 
         p = FXGroupBox(self, 'Usage details', opts=FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y)
         self.text = FXText(p,
