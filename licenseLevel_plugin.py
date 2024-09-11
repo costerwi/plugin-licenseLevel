@@ -23,6 +23,8 @@ features = (
     'QAX tokens for Abaqus CAE, fe-safe GUI, Isight Gateway\tAbaqus "Extended" graphical user interface licenses',
     'QSI tokens for Abaqus CAE Solidworks Associative Interface',
     'QPA tokens for Abaqus CAE Creo Associative Interface',
+    'QCA tokens for Abaqus CAE CATIA v5 Associative Interface',
+    'QGA tokens for Abaqus CAE NX Associative Interface',
 )
 
 ###########################################################################
@@ -53,7 +55,7 @@ class licenseLevelDB(AFXDataDialog):
             self.progress[trigram] = AFXProgressBar(h,
                 opts=LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT|AFXPROGRESSBAR_ITERATOR, 
                 w=200, h=22)
-            if trigram in ('QAT', 'QPT', 'QSI', 'QPA'):
+            if trigram in ('QAT', 'QPT', 'QSI', 'QPA', 'QCA', 'QGA'):
                 h.hide()  # hide tokens unless they are available on server
 
         p = FXGroupBox(self, 'Usage details', opts=FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y)
