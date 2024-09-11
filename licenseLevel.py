@@ -3,7 +3,7 @@
 
 Usage:
 
-    abaqus python licenseLevel.py [--all] [trigram...]
+    abaqus python licenseLevel.py [--all] [-v5] [trigram...]
 
 Carl Osterwisch, May 2024
 https://github.com/costerwi/plugin-licenseLevel
@@ -56,8 +56,11 @@ class UsageLine(object):
         return re.sub('\(.+, ', '', self.line)
 
 
-def dslsstat():
-    "Collect current license usage data using dslsstat"
+def dslsstat(v5=False):
+    """Collect current license usage data using dslsstat
+
+    The truthy v5 parameter switches to collecting CATIA v5 trigrams
+    """
     import subprocess
     from subprocess import Popen, PIPE
     import sys
@@ -65,6 +68,8 @@ def dslsstat():
     if sys.platform == 'win32':
         cmd[0] += '.bat' # Windows batch file
     cmd[0] = os.environ.get('ABAQUS_CMD', cmd[0]) # use env variable if available
+    if v5:
+        cmd.append('-v5') # Catia v5 trigrams
     proc = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE)
     if sys.version_info.major >= 3:
         stdout_data, stderr_data = proc.communicate(timeout=60)
@@ -127,7 +132,7 @@ def summarize(stdout, stderr=None):
 def printSummary(trigrams=[]):
     "Print license status to stdout"
     if sys.stdin.isatty():
-        licenseFeatures = dslsstat()
+        licenseFeatures = dslsstat('-v5' in trigrams)
     else:
         # read from pipe
         licenseFeatures = summarize(sys.stdin)
@@ -137,7 +142,7 @@ def printSummary(trigrams=[]):
     if not trigrams:
         # use default Abaqus list
         trigrams = 'QAT', 'QPT', 'QXT', 'SRU', 'SUN', 'QAX', 'QSI', 'QPA'
-    elif '--all' in trigrams:
+    elif '--all' in trigrams or '-v5' in trigrams:
         # report all available features
         trigrams = sorted(licenseFeatures.keys())
     for trigram in trigrams:
