@@ -25,6 +25,7 @@ features = (
     'QPA tokens for Abaqus CAE Creo Associative Interface',
     'QCA tokens for Abaqus CAE CATIA v5 Associative Interface',
     'QGA tokens for Abaqus CAE NX Associative Interface',
+    'QCM tokens for Abaqus CAE Composites Modeler',
 )
 
 ###########################################################################
