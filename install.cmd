@@ -10,11 +10,7 @@ if defined HOME (
 
 echo This script copies the Abaqus CAE plugin "%plugin%" into "%abaqus_plugins%"
 
-if not exist "%abaqus_plugins%" (
-    echo ERROR: "%abaqus_plugins%" does not exist.
-    pause
-    exit 1
-)
+if not exist "%abaqus_plugins%" mkdir "%abaqus_plugins%"
 
 set destination=%abaqus_plugins%\%plugin%\
 if "%~dp0"=="%destination%" (

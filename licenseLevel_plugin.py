@@ -11,7 +11,7 @@ import abaqusGui
 from kernelAccess import session
 import sys
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # List of Abaqus features to report. Note: license trigram must be the first word
 features = (
