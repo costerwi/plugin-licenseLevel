@@ -11,7 +11,7 @@ import abaqusGui
 from kernelAccess import session
 import sys
 
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 
 # List of Abaqus features to report. Note: license trigram must be the first word
 features = (
@@ -20,11 +20,13 @@ features = (
     'QXT solver tokens for Abaqus, fe-safe, Tosca, Isight\tSimulia "Extended" solver licenses',
     'SRU solver tokens for above plus CST, Simpack, PowerFLOW\tSimulia universal "SimUnit" solver licenses',
     'SUN solver credits for above plus CST, Simpack, PowerFLOW\tSimulia pre-paid consumable "SimUnit" solver licenses',
+    'QAE tokens for Abaqus CAE\tAbaqus graphical user interface',
     'QAX tokens for Abaqus CAE, fe-safe GUI, Isight Gateway\tAbaqus "Extended" graphical user interface licenses',
     'QSI tokens for Abaqus CAE Solidworks Associative Interface',
     'QPA tokens for Abaqus CAE Creo Associative Interface',
     'QCA tokens for Abaqus CAE CATIA v5 Associative Interface',
     'QGA tokens for Abaqus CAE NX Associative Interface',
+    'QGD tokens for Abaqus CAE Parasolid Interface',
     'QCM tokens for Abaqus CAE Composites Modeler',
 )
 
@@ -56,8 +58,8 @@ class licenseLevelDB(AFXDataDialog):
             self.progress[trigram] = AFXProgressBar(h,
                 opts=LAYOUT_FIX_WIDTH|LAYOUT_FIX_HEIGHT|AFXPROGRESSBAR_ITERATOR, 
                 w=200, h=22)
-            if trigram in ('QAT', 'QPT', 'QSI', 'QPA', 'QCA', 'QGA'):
-                h.hide()  # hide tokens unless they are available on server
+            if trigram in ('QAT', 'QPT', 'QAE', 'QSI', 'QPA', 'QCA', 'QGA', 'QGD', 'QCM'):
+                h.hide()  # hide less common tokens unless they are available on server
 
         p = FXGroupBox(self, 'Usage details', opts=FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y)
         self.text = FXText(p,
